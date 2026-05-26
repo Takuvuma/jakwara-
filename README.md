@@ -1,21 +1,31 @@
-# Jakwara — Atlanta Events Aggregator API
+# Jakwara — Atlanta Summer 2026 Events Platform
 
-A FastAPI-powered REST API that aggregates live event data from multiple ticketing platforms (Ticketmaster, SeatGeek, Eventbrite), focused on Atlanta, GA — including FIFA World Cup 2026 matches.
+An AI-powered event discovery platform for Summer 2026 and the FIFA World Cup 2026 in Atlanta. Jakwara helps visitors from around the world find events that match their culture, nationality, team allegiance, and personal taste — using Claude AI as the concierge.
 
 ---
 
 ## What It Does
 
-Jakwara pulls event listings from several ticket-selling APIs, normalizes them into a single schema, and exposes clean endpoints for querying what's happening in Atlanta. Key use cases:
-
-- Browse all Atlanta events by date range, category, or venue
-- Get FIFA World Cup 2026 Atlanta match schedule and ticket info
-- Search events by artist, team, or keyword
-- Explore venues with upcoming events
+- **AI Chat Concierge** — Tell Jakwara where you're from and what you love; it searches events and explains why each one fits you specifically
+- **Personalized Recommendations** — Profile-based event curation connecting your cultural background to Atlanta's event calendar
+- **Trip Planner** — Day-by-day Atlanta itinerary builder that includes World Cup matches, concerts, food, and local culture
+- **Event Browser** — Filter and search all Atlanta Summer 2026 events by category, date, or keyword
 
 ---
 
 ## Tech Stack
+
+### Frontend
+
+| Layer | Tool |
+|---|---|
+| Framework | Next.js 15 (App Router) |
+| Language | TypeScript + React 19 |
+| Styling | Tailwind CSS |
+| AI | Claude claude-opus-4-7 via `@anthropic-ai/sdk` |
+| Streaming | Server-Sent Events (SSE) |
+
+### Backend
 
 | Layer | Tool |
 |---|---|
@@ -32,24 +42,45 @@ Jakwara pulls event listings from several ticket-selling APIs, normalizes them i
 
 ```
 jakwara/
-├── main.py               # FastAPI app, lifespan, middleware, route registration
-├── config.py             # Settings loaded from environment variables
+├── README.md
+├── .env.example             # Backend API keys template
+│
+├── main.py                  # FastAPI app entry point
+├── config.py                # Settings from environment variables
 ├── requirements.txt
-├── .env.example          # Copy to .env and fill in your API keys
 │
 ├── models/
-│   └── event.py          # Unified Event and Venue Pydantic schemas
+│   └── event.py             # Unified Event + Venue Pydantic schemas
 │
 ├── services/
-│   ├── ticketmaster.py   # Ticketmaster Discovery API client
-│   ├── seatgeek.py       # SeatGeek API client
-│   ├── eventbrite.py     # Eventbrite API client
-│   └── aggregator.py     # Merges results from all sources, deduplicates
+│   ├── ticketmaster.py      # Ticketmaster Discovery API client
+│   ├── seatgeek.py          # SeatGeek API client
+│   ├── eventbrite.py        # Eventbrite API client
+│   └── aggregator.py        # Merges + deduplicates across all sources
 │
-└── routers/
-    ├── events.py         # /events endpoints
-    ├── venues.py         # /venues endpoints
-    └── search.py         # /search endpoint
+├── routers/
+│   ├── events.py            # /events endpoints
+│   ├── venues.py            # /venues endpoints
+│   └── search.py            # /search endpoint
+│
+└── frontend/                # Next.js 15 web app
+    ├── app/
+    │   ├── layout.tsx        # Root layout + navigation
+    │   ├── page.tsx          # Landing page with hero + category links
+    │   ├── discover/         # AI chat concierge page
+    │   ├── events/           # Browse + filter all events
+    │   ├── planner/          # Trip planner UI
+    │   └── api/
+    │       ├── chat/         # Streaming Claude chat endpoint
+    │       ├── recommend/    # Profile-based recommendation endpoint
+    │       └── plan/         # Trip itinerary generation endpoint
+    ├── components/
+    │   ├── EventCard.tsx     # Reusable event card with image, price, tickets
+    │   ├── ChatInterface.tsx # Real-time SSE chat UI
+    │   └── TripPlanner.tsx   # Multi-step trip planner form + result
+    └── lib/
+        ├── mockData.ts       # 10 mock Atlanta/World Cup events (dev fallback)
+        └── api.ts            # FastAPI client with mock fallback
 ```
 
 ---
@@ -135,7 +166,7 @@ All sources are normalized to this model:
 
 ## Getting Started
 
-### 1. Clone and install
+### Backend (FastAPI)
 
 ```bash
 git clone https://github.com/Takuvuma/jakwara-.git
@@ -143,35 +174,30 @@ cd jakwara
 python -m venv .venv
 source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-### 2. Configure API keys
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and fill in your keys:
-
-```env
-TICKETMASTER_API_KEY=your_key_here
-SEATGEEK_CLIENT_ID=your_client_id
-SEATGEEK_CLIENT_SECRET=your_client_secret
-EVENTBRITE_API_KEY=your_key_here
-```
-
-**Where to get keys (all free):**
-- Ticketmaster: https://developer.ticketmaster.com/
-- SeatGeek: https://seatgeek.com/account/develop
-- Eventbrite: https://www.eventbrite.com/platform/api
-
-### 3. Run the dev server
-
-```bash
+cp .env.example .env           # then fill in your API keys
 uvicorn main:app --reload
 ```
 
 Open http://localhost:8000/docs for the interactive Swagger UI.
+
+**Where to get API keys (all free):**
+- Ticketmaster: https://developer.ticketmaster.com/
+- SeatGeek: https://seatgeek.com/account/develop
+- Eventbrite: https://www.eventbrite.com/platform/api
+
+### Frontend (Next.js)
+
+```bash
+cd frontend
+npm install
+cp .env.local.example .env.local   # then add your ANTHROPIC_API_KEY
+npm run dev
+```
+
+Open http://localhost:3000 — the frontend works immediately with mock data. Add your `ANTHROPIC_API_KEY` to `.env.local` to enable AI features, and start the backend on port 8000 for live event data.
+
+**Where to get Claude API key (required for AI):**
+- Anthropic Console: https://console.anthropic.com/
 
 ---
 
