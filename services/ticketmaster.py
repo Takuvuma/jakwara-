@@ -6,7 +6,7 @@ from models.event import Event, Venue
 
 _BASE = "https://app.ticketmaster.com/discovery/v2"
 # FIFA World Cup 2026 attraction ID on Ticketmaster
-_WORLDCUP_ATTRACTION_ID = "K8vZ917G7x7"
+_WORLDCUP_ATTRACTION_ID = "K8vZ917rUHV"
 
 
 def _parse_event(raw: dict) -> Event:
